@@ -10,14 +10,22 @@ RUN apt-get update && apt-get install -y \
     libpcre3-dev \
     zlib1g-dev \
     wget \
-    curl
+    curl \
+    clang \
+    make \
+    python3
 
 # کلون کردن پروژه MTProto Proxy از گیت‌هاب
 RUN git clone https://github.com/TelegramMessenger/MTProxy.git /opt/mtproxy
 
 # نصب MTProto Proxy
 WORKDIR /opt/mtproxy
-RUN make && make install
+
+# استفاده از حالت verbose در make برای نمایش دقیق‌تر خطاها
+RUN make V=1
+
+# نصب MTProto Proxy
+RUN make install
 
 # تنظیم پورت و سکرت‌ها از متغیرهای محیطی
 ENV MTP_PORT 443
