@@ -1,19 +1,26 @@
-# استفاده از تصویر پایه debian
+# استفاده از تصویر پایه Debian
 FROM debian:latest
 
-# به‌روزرسانی سیستم و نصب پیش‌نیازها
+# نصب پیش‌نیازها
 RUN apt-get update && apt-get install -y \
-    curl \
-    bash \
     git \
     build-essential \
     libssl-dev \
+    libpcre3 \
+    libpcre3-dev \
     zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
+    wget \
+    curl
 
-# دانلود و اجرای اسکریپت نصب MTProto Proxy
-RUN curl -L -o mtp_install.sh https://git.io/fj5ru && \
-    bash mtp_install.sh -p 443 -s ff543ebef83147d3da80042d24e2999e -t aa5dd98949ac427e013fd9840648520e -a dd -a tls -d s3.amazonaws.com
+# کلون کردن پروژه MTProto Proxy
+RUN git clone https://github.com/TelegramMessenger/MTProxy.git /opt/mtproxy
 
-# تنظیمات مورد نیاز برای اجرای پروکسی
-CMD ["bash", "/opt/mtproto/mtp_proxy", "-u", "mtproto", "-p", "443"]
+# نصب MTProto Proxy
+WORKDIR /opt/mtproxy
+RUN make && make install
+
+# تنظیم پورت و سکرت
+EXPOSE 443
+
+# فرمان اجرای پروکسی با پارامترهای لازم
+CMD ["./mtproto_proxy", "-p", "443", "-s", "ff543ebef83147d3da80042d24e2999e", "-t", "aa5dd98949ac427e013fd9840648520e"]
