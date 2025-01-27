@@ -1,4 +1,4 @@
-# استفاده از تصویر پایه Debian
+# انتخاب تصویر پایه Debian
 FROM debian:latest
 
 # نصب پیش‌نیازها
@@ -12,9 +12,20 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl
 
- run -d --network=host seriyps/mtproto-proxy -p 443 -s ff543ebef83147d3da80042d24e2999e -t aa5dd98949ac427e013fd9840648520e
+# کلون کردن پروژه MTProto Proxy از گیت‌هاب
+RUN git clone https://github.com/TelegramMessenger/MTProxy.git /opt/mtproxy
 
+# نصب MTProto Proxy
+WORKDIR /opt/mtproxy
+RUN make && make install
 
+# تنظیم پورت و سکرت‌ها از متغیرهای محیطی
+ENV MTP_PORT 443
+ENV MTP_SECRET ff543ebef83147d3da80042d24e2999e
+ENV MTP_TAG aa5dd98949ac427e013fd9840648520e
 
-# تنظیم پورت و سکرت
+# باز کردن پورت 443
 EXPOSE 443
+
+# فرمان اجرای پروکسی با پارامترهای پیکربندی شده
+CMD ["./mtproto_proxy", "-p", "443", "-s", "$MTP_SECRET", "-t", "$MTP_TAG"]
